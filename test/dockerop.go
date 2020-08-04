@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"flag"
 	"fmt"
 	"log"
+	"os"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/mount"
@@ -29,7 +32,8 @@ const prompt = `
 	cstop:    cli.ContainerStop
 	cremove:  cli.ContainerRemove
 	cinspect: cli.ContainerInspect
-	clogs:    cli.ContainerLogs`
+	clogs:    cli.ContainerLogs
+	cexec:    cli.ContainerExec`
 
 var (
 	fcode string
@@ -57,7 +61,7 @@ func main() {
 	if err != nil {
 		log.Printf("new client err %+v\n", err)
 	}
-	log.Printf("client created success!\n")
+	log.Printf("client created success! connect to host: %+v!\n", host)
 
 	for {
 		fmt.Println(prompt)
@@ -138,6 +142,14 @@ func doTest(cli *dockerop.OpClient, fcode string) {
 		fmt.Println("Input container or containerID:")
 		fmt.Scanln(&cname)
 		handle(cli.ContainerLogs(ctx, cname))
+	case "cexec":
+		fmt.Println("Input containerID:")
+		fmt.Scanln(&cname)
+		fmt.Println("Input cmd:")
+		reader := bufio.NewReader(os.Stdin)
+		data, _, _ := reader.ReadLine()
+		cmd := string(data)
+		handle(cli.ContainerExec(ctx, cname, strings.Split(cmd, " ")))
 	default:
 		fmt.Println("not support:", fcode)
 	}

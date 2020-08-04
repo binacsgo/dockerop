@@ -3,11 +3,13 @@ package dockerop
 import (
 	"bytes"
 	"context"
+	"io"
 	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/go-connections/nat"
 )
@@ -38,7 +40,7 @@ func (c *OpClient) ContainerCreate(ctx context.Context, def *ContainerDef) (stri
 	}, &container.HostConfig{
 		PortBindings: def.PortMap,
 		Mounts:       def.Mounts,
-	}, nil, def.CName)
+	}, &network.NetworkingConfig{}, nil, def.CName)
 	return resp.ID, err
 }
 
@@ -87,4 +89,31 @@ func (c *OpClient) ContainerLogs(ctx context.Context, containerID string) (strin
 	info := new(bytes.Buffer)
 	info.ReadFrom(reader)
 	return info.String(), nil
+}
+
+// ContainerExec exec cmds in remote docker and return stdout/stderr
+// cmd such as : []string{"ls", "-al"},
+func (c *OpClient) ContainerExec(ctx context.Context, containerID string, cmd []string) (string, error) {
+	idr, err := c.client.ContainerExecCreate(ctx, containerID, types.ExecConfig{AttachStdout: true, AttachStderr: true, Cmd: cmd})
+	if err != nil {
+		return "", err
+	}
+	resp, err := c.client.ContainerExecAttach(ctx, idr.ID, types.ExecStartCheck{})
+	defer resp.Close()
+	if err != nil {
+		return "", err
+	}
+	// 去除头部乱码
+	//for i := 0; i < 8; i++ {
+	//	resp.Reader.ReadByte()
+	//}
+	var res string
+	for {
+		text, err := resp.Reader.ReadString('\n')
+		res += text
+		if err == io.EOF {
+			break
+		}
+	}
+	return res, nil
 }

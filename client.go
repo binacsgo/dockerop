@@ -21,7 +21,7 @@ type OpClient struct {
 
 // NewOpClient return a pointer to OpClient
 func NewOpClient(host string, httpcli *http.Client) (*OpClient, error) {
-	cli, err := client.NewClient(host, "", httpcli, nil)
+	cli, err := client.NewClient(host, "v1.40", httpcli, nil)
 	if err != nil {
 		return nil, err
 	}

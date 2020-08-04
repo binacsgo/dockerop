@@ -26,6 +26,7 @@ type DockerOp interface {
 	ContainerRemove(ctx context.Context, containerID string) error
 	ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error)
 	ContainerLogs(ctx context.Context, containerID string) (string, error)
+	ContainerExec(ctx context.Context, containerID string, cmd []string) (string, error)
 	//ContainersPrune(ctx context.Context) error
 }
 ```
