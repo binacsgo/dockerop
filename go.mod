@@ -9,7 +9,7 @@ require (
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200803163140-c56068660006+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/docker/go-units v0.4.0 // indirect
-	github.com/gogo/protobuf v1.3.1 // indirect
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/go-cmp v0.5.1 // indirect
 	github.com/gorilla/mux v1.7.4 // indirect
 	github.com/moby/term v0.0.0-20200611042045-63b9a826fb74 // indirect
